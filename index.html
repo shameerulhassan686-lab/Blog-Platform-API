@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Blog Platform API | Interactive Dashboard</title>
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <!-- Background Ambient Gradients -->
+  <div class="ambient-glow glow-1"></div>
+  <div class="ambient-glow glow-2"></div>
+
+  <div class="app-container">
+    <!-- Header / Navbar -->
+    <header class="navbar">
+      <div class="nav-brand">
+        <div class="brand-icon">
+          <i class="fa-solid fa-feather-pointed"></i>
+        </div>
+        <div>
+          <h1>Blog Platform API</h1>
+          <span class="badge badge-tech">Express + JWT + SQLite (SQL)</span>
+        </div>
+      </div>
+
+      <div class="nav-auth-status" id="authStatusContainer">
+        <!-- JS will populate guest or logged-in status -->
+        <span class="status-dot dot-offline" id="statusDot"></span>
+        <span id="authStatusText">Not Logged In</span>
+        <button class="btn btn-outline btn-sm hidden" id="logoutBtn">
+          <i class="fa-solid fa-right-from-bracket"></i> Logout
+        </button>
+      </div>
+    </header>
+
+    <!-- Main Content Layout -->
+    <main class="main-grid">
+      <!-- Left Sidebar: Auth & Token Management -->
+      <aside class="sidebar">
+        <!-- Auth Cards / Tabs -->
+        <div class="card glass-card">
+          <div class="card-header">
+            <h3><i class="fa-solid fa-user-shield"></i> User Authentication</h3>
+            <div class="tab-switcher">
+              <button class="tab-btn active" id="tabLoginBtn" onclick="switchAuthTab('login')">Login</button>
+              <button class="tab-btn" id="tabRegisterBtn" onclick="switchAuthTab('register')">Register</button>
+            </div>
+          </div>
+
+          <!-- Login Form -->
+          <form id="loginForm" class="auth-form">
+            <div class="form-group">
+              <label for="loginEmail"><i class="fa-solid fa-envelope"></i> Email</label>
+              <input type="email" id="loginEmail" placeholder="user@example.com" required>
+            </div>
+            <div class="form-group">
+              <label for="loginPassword"><i class="fa-solid fa-lock"></i> Password</label>
+              <input type="password" id="loginPassword" placeholder="••••••••" required>
+            </div>
+            <button type="submit" class="btn btn-primary btn-full">
+              <i class="fa-solid fa-right-to-bracket"></i> Log In
+            </button>
+          </form>
+
+          <!-- Register Form -->
+          <form id="registerForm" class="auth-form hidden">
+            <div class="form-group">
+              <label for="regUsername"><i class="fa-solid fa-user"></i> Username</label>
+              <input type="text" id="regUsername" placeholder="johndoe" required>
+            </div>
+            <div class="form-group">
+              <label for="regEmail"><i class="fa-solid fa-envelope"></i> Email</label>
+              <input type="email" id="regEmail" placeholder="user@example.com" required>
+            </div>
+            <div class="form-group">
+              <label for="regPassword"><i class="fa-solid fa-lock"></i> Password</label>
+              <input type="password" id="regPassword" placeholder="•••••••• (Min 6 chars)" required>
+            </div>
+            <button type="submit" class="btn btn-secondary btn-full">
+              <i class="fa-solid fa-user-plus"></i> Register User
+            </button>
+          </form>
+        </div>
+
+        <!-- JWT Token Debugger Card -->
+        <div class="card glass-card margin-top">
+          <div class="card-header">
+            <h3><i class="fa-solid fa-key"></i> Active JWT Bearer Token</h3>
+            <button class="btn-icon" title="Copy Token" onclick="copyJwtToken()">
+              <i class="fa-solid fa-copy"></i>
+            </button>
+          </div>
+          <div class="token-box" id="tokenDisplay">
+            <span class="token-placeholder">No active JWT session. Log in or register to get a Bearer token.</span>
+          </div>
+        </div>
+
+        <!-- Endpoints Quick Ref -->
+        <div class="card glass-card margin-top">
+          <div class="card-header">
+            <h3><i class="fa-solid fa-network-wired"></i> API Route Matrix</h3>
+          </div>
+          <ul class="route-list">
+            <li><span class="method post">POST</span> <code>/register</code> <span class="tag public">Public</span></li>
+            <li><span class="method post">POST</span> <code>/login</code> <span class="tag public">Public</span></li>
+            <li><span class="method get">GET</span> <code>/posts</code> <span class="tag public">Public</span></li>
+            <li><span class="method get">GET</span> <code>/posts/:id</code> <span class="tag public">Public</span></li>
+            <li><span class="method post">POST</span> <code>/posts</code> <span class="tag protected">JWT Req</span></li>
+            <li><span class="method put">PUT</span> <code>/posts/:id</code> <span class="tag protected">Author Only</span></li>
+            <li><span class="method delete">DELETE</span> <code>/posts/:id</code> <span class="tag protected">Author Only</span></li>
+          </ul>
+        </div>
+      </aside>
+
+      <!-- Right Column: Blog Posts & Actions -->
+      <section class="content-area">
+        <!-- New Post Form Card -->
+        <div class="card glass-card">
+          <div class="card-header">
+            <h3><i class="fa-solid fa-pen-to-square"></i> Create Blog Post</h3>
+            <span class="badge badge-auth-req"><i class="fa-solid fa-shield"></i> Protected Route</span>
+          </div>
+          <form id="createPostForm">
+            <div class="form-group">
+              <label for="postTitle">Post Title</label>
+              <input type="text" id="postTitle" placeholder="e.g. Building Scalable APIs with Node & Express" required>
+            </div>
+            <div class="form-group">
+              <label for="postContent">Content</label>
+              <textarea id="postContent" rows="3" placeholder="Write your post content here..." required></textarea>
+            </div>
+            <div class="form-row">
+              <div class="form-group flex-1">
+                <label for="postTags">Tags (comma separated)</label>
+                <input type="text" id="postTags" placeholder="e.g. nodejs, express, jwt">
+              </div>
+              <div class="form-group form-align-end">
+                <button type="submit" class="btn btn-primary" id="createPostBtn">
+                  <i class="fa-solid fa-paper-plane"></i> Publish Post
+                </button>
+              </div>
+            </div>
+          </form>
+        </div>
+
+        <!-- Blog Posts Section -->
+        <div class="card glass-card margin-top">
+          <div class="card-header">
+            <div>
+              <h3><i class="fa-solid fa-newspaper"></i> Published Blog Posts</h3>
+              <p class="subtitle">Publicly readable. Edit and delete operations are restricted to post authors.</p>
+            </div>
+            <button class="btn btn-outline btn-sm" onclick="fetchPosts()">
+              <i class="fa-solid fa-rotate-right"></i> Refresh
+            </button>
+          </div>
+
+          <!-- Loading Spinner -->
+          <div id="loadingPosts" class="loading-container hidden">
+            <div class="spinner"></div>
+            <p>Fetching posts...</p>
+          </div>
+
+          <!-- Posts Container -->
+          <div id="postsList" class="posts-grid">
+            <!-- Dynamically populated -->
+          </div>
+        </div>
+
+        <!-- Live API Response Inspector -->
+        <div class="card glass-card margin-top">
+          <div class="card-header">
+            <h3><i class="fa-solid fa-terminal"></i> Live HTTP Console</h3>
+            <button class="btn-icon" title="Clear Console" onclick="clearConsole()">
+              <i class="fa-solid fa-trash"></i>
+            </button>
+          </div>
+          <pre class="console-box" id="consoleOutput">System initialized. Ready for API requests.</pre>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div id="toastContainer" class="toast-container"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>

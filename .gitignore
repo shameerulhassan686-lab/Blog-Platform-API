@@ -1,0 +1,14 @@
+# Dependencies
+node_modules/
+
+# Environment Variables
+.env
+
+# Database Files
+*.sqlite
+blog_platform.sqlite
+
+# Log Files
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
